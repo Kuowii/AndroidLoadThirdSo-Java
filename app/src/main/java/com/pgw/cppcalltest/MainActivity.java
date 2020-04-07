@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -20,6 +21,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     EditText textModuleName;
     EditText textFunName;
     Button btnLoad;
+    Button btnDecry;
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -39,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public native String stringFromJNI();
     public native String JNILoadTest(String moduleName,String funName);
+    public native int decryFile(String oldFile,String newFile);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +57,9 @@ public class MainActivity extends AppCompatActivity {
         textModuleName = findViewById(R.id.textModuleName);
         textFunName = findViewById(R.id.textFunName);
         btnLoad = findViewById(R.id.btnLoad);
+        btnDecry = findViewById(R.id.btnDecry);
 
-        tv.setText(JNILoadTest("libthird-lib.so","TestC"));
+        //tv.setText(JNILoadTest("libthird-lib.so","TestC"));
 
         btnLoad.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,12 +76,19 @@ public class MainActivity extends AppCompatActivity {
                 CopyFile(moduleName.toString());
 
                 tv.setText(JNILoadTest("/data/user/0/" + pn +"/app_libs" + moduleName.toString(),funName.toString() ));
+            }
+        });
 
-
+        btnDecry.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public  void onClick(View v)
+            {
+                CheckFiles();
             }
         });
     }
 
+    // 将 so 文件复制到对应的可读取目录
     protected int CopyFile(String path)
     {
         try {
@@ -139,6 +152,29 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // 获取指定目录下的所有文件
+    protected void CheckFiles()
+    {
+        List<String> Files = FileHelper.getFilesAllName(Environment.getExternalStorageDirectory() + "/Pictures/Data/Origin");
+        List<String> Files_New = new ArrayList<>();
+        int size = Files.size();
+        for(int i =0;i<size;i++)
+        {
+            String old = Files.get(i);
+            String parentPath = old.substring(old.lastIndexOf("Origin") + 6);
+            String newFile = Environment.getExternalStorageDirectory() + "/Pictures/Data/New"+parentPath;
+            FileHelper.createFile(newFile);
+
+            int r = decryFile(old,newFile);
+
+            if(r > 0)
+            {
+                tv.setText(old +" decry fail.");
+                break;
+            }
+        }
+    }
+
 
     //先定义
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -147,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
             "android.permission.READ_EXTERNAL_STORAGE",
             "android.permission.WRITE_EXTERNAL_STORAGE" };
 
-    //然后通过一个函数来申请
+    //权限检测 然后通过一个函数来申请
     public static void verifyStoragePermissions(Activity activity) {
         try {
             //检测是否有写的权限

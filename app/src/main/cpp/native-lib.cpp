@@ -3,12 +3,53 @@
 #include <dlfcn.h>
 #include "FileHelper.h"
 
+typedef char*(*fun)(char*,int,char*,int,int*);
+
+fun tsetcfun;
+const  char* key = "v#key";
+
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_pgw_cppcalltest_MainActivity_stringFromJNI(
         JNIEnv* env,
         jobject /* this */) {
     std::string hello = "Hello from C++";
     return env->NewStringUTF(hello.c_str());
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_pgw_cppcalltest_MainActivity_decryFile(
+        JNIEnv* env,jobject /* this */,
+        jstring oldFile,jstring newFile) {
+
+    const char* ccsOldFile;
+    const char* ccsNewFile;
+
+    ccsOldFile = env->GetStringUTFChars(oldFile,0);
+    ccsNewFile = env->GetStringUTFChars(newFile, 0);
+
+    env->ReleaseStringUTFChars(oldFile, ccsOldFile);
+    env->ReleaseStringUTFChars(newFile, ccsNewFile);
+
+    long len = 0;
+    int nlen = 0;
+    char* data;
+    char* loaded = LoadFile(ccsOldFile,&data,&len);
+
+    if(loaded != NULL)
+    {
+        char* nData = tsetcfun(data,len,(char*)key,5,&nlen);
+        if(nData && nlen>0)
+        {
+            int r = SaveFile(ccsNewFile,nData,nlen);
+            return 0;
+        }
+
+    } else
+    {
+        return 3;
+    }
+
+    return 0;
 }
 
 extern "C" JNIEXPORT jstring
@@ -44,39 +85,11 @@ Java_com_pgw_cppcalltest_MainActivity_JNILoadTest(
         re = "Load module success.\n";
     }
 
-    typedef char*(*fun)(char*,int,char*,int,int*);
-
-    fun tsetcfun = (fun)dlsym(handle,ccsFunName);
+    tsetcfun = (fun)dlsym(handle,ccsFunName);
 
     if(tsetcfun)
     {
         re += " load fun " + strFunName + " success.\n";
-        long len = 0;
-        int nlen = 0;
-        char* data;
-        char* loaded = LoadFile("/storage/emulated/0/Test.txt",&data,&len);
-
-        const  char* key = "v#key";
-
-        if(loaded != NULL)
-        {
-            re+=" load file OK\n";
-            sprintf(chs,"data[1] is %d len=%d\n",data[1],len);
-            re += chs;
-
-            char* nData = tsetcfun(data,len,(char*)key,5,&nlen);
-            if(nData && nlen>0)
-            {
-                re+=" decry file OK\n";
-                int r = SaveFile("/storage/emulated/0/Test_de.txt",nData,nlen);
-                sprintf(chs,"save count =%d,r = %d\n nData[1] = %d",nlen,r,nData[1]);
-                re += chs;
-            }
-
-        } else
-        {
-            re += "load file fail.\n";
-        }
 
     } else
     {
