@@ -6,68 +6,70 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
+    <ScrollView
+        android:id="@+id/scrollView2"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="200dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/pbMainDealFiles"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.50">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <EditText
-            android:id="@+id/textModuleName"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:gravity="start|top"
-            android:inputType="text"
-            android:text="/libthird-lib.so" />
+            android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/textFunName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:gravity="start|top"
-            android:inputType="text"
-            android:text="TestDecryptData" />
+            <EditText
+                android:id="@+id/textModuleName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:gravity="start|top"
+                android:inputType="text"
+                android:text="/libthird-lib.so" />
 
-        <EditText
-            android:id="@+id/textKey"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:gravity="start|top"
-            android:inputType="text"
-            android:text="v#key" />
+            <EditText
+                android:id="@+id/textFunName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:gravity="start|top"
+                android:inputType="text"
+                android:text="TestDecryptData" />
 
-        <EditText
-            android:id="@+id/textPoint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:gravity="start|top"
-            android:inputType="number|text"
-            android:text="9" />
+            <EditText
+                android:id="@+id/textKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:gravity="start|top"
+                android:inputType="text"
+                android:text="v#key" />
 
-        <Button
-            android:id="@+id/btnLoad"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Load" />
+            <EditText
+                android:id="@+id/textPoint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:gravity="start|top"
+                android:inputType="number|text"
+                android:text="9" />
 
-        <Button
-            android:id="@+id/btnDecry"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="DECRY" />
+            <Button
+                android:id="@+id/btnLoad"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Load" />
 
-    </LinearLayout>
+            <Button
+                android:id="@+id/btnDecry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DECRY" />
+
+        </LinearLayout>
+    </ScrollView>
 
     <ProgressBar
         android:id="@+id/pbMainDealFiles"
@@ -78,7 +80,7 @@
         android:progress="50"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/scrollView2" />
 
     <TextView
         android:id="@+id/pbText"
@@ -87,7 +89,7 @@
         android:text="50/100"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linearLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/scrollView2" />
 
     <TextView
         android:id="@+id/sample_text"
