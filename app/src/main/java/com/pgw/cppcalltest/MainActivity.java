@@ -127,10 +127,10 @@ public class MainActivity extends AppCompatActivity {
                 Editable key = textKey.getText();
                 Editable point = textPoint.getText();
                 if(TextUtils.isEmpty(key) || TextUtils.isEmpty(point))
-                {
-                    tv.setText( "Invail config." );
-                    return;
-                }
+            {
+                tv.setText( "Invail config." );
+                return;
+            }
 
                 tPoint = Integer.parseInt(point.toString());
                 SetKeyAndPoint(key.toString(),tPoint);
@@ -253,6 +253,12 @@ public class MainActivity extends AppCompatActivity {
     {
         pbText.setText(String.format("%d/%d",cur,nCount));
         pbMainDealFiles.setProgress(cur);
+    }
+
+    public void UpdateMax(Integer newMax)
+    {
+        nCount = newMax;
+        pbMainDealFiles.setMax(newMax);
     }
 
 

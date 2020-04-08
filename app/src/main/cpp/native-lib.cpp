@@ -6,7 +6,7 @@
 typedef char*(*fun)(char*,int,char*,int,int*);
 
 fun tsetcfun;
-const char* key = "v#key";
+char* key = "v#key";
 int keyLen = 5;
 int gPoint = 9;
 
@@ -19,11 +19,12 @@ Java_com_pgw_cppcalltest_MainActivity_SetKeyAndPoint(
     ccsNewKey = env->GetStringUTFChars(newKey,0);
     env->ReleaseStringUTFChars(newKey, ccsNewKey);
 
-    key = ccsNewKey;
+    keyLen = strlen(ccsNewKey);
+    key = new char[keyLen];
+    memcpy(key,ccsNewKey,keyLen);
     gPoint = newPoint;
-    keyLen = strlen(key);
 
-    //__android_log_print(ANDROID_LOG_INFO,"Main","keyLen=%d",keyLen);
+    __android_log_print(ANDROID_LOG_INFO,"Main","new key = %s keyLen=%d",key,keyLen);
 
     return 0;
 }
@@ -51,17 +52,22 @@ Java_com_pgw_cppcalltest_MainActivity_decryFile(
     env->ReleaseStringUTFChars(newFile, ccsNewFile);
 
     long len = 0;
-    int nlen = 0;
+    long nlen = 0;
     char* data;
     char* loaded = LoadFile(ccsOldFile,&data,&len);
 
     if(loaded != NULL)
     {
-        char* nData = tsetcfun(data+point,len-point,(char*)key,keyLen,&nlen);
+        char* nData = tsetcfun(data+point,len-point,key,keyLen,(int*)&nlen);
         if(nData && nlen>0)
         {
             int r = SaveFile(ccsNewFile,nData,nlen);
             return 0;
+        } else
+        {
+            int r = SaveFile(ccsNewFile,data,len);
+            //__android_log_print(ANDROID_LOG_INFO,"Main","save len=%d , key=%s",nlen,key);
+            return 2;
         }
 
     } else

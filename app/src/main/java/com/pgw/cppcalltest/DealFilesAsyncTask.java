@@ -19,8 +19,12 @@ public class DealFilesAsyncTask extends AsyncTask< List<String>, Integer,Integer
                 ins = MainActivity.GetInstance();
             }
 
+            // 此处似乎不允许跨类调用UI变化
+            //ins.Log("Wait for count files.");
+            //List<String> Files = FileHelper.getFilesAllName(params[0]);
             List<String> Files = params[0];
             size = Files.size();
+            //ins.UpdateMax(size);
 
             String newRootPath = Environment.getExternalStorageDirectory() + "/Pictures/Data/New";
             for(int i =0;i<size;i++)
@@ -33,8 +37,8 @@ public class DealFilesAsyncTask extends AsyncTask< List<String>, Integer,Integer
                 int r = ins.decryFile(old,newFile,ins.tPoint);
                 if(r > 0)
                 {
-                    ins.Log("Decry fail : " + old);
-                    break;
+                    //ins.Log(r+ " return. Decry fail : " + old);
+                    continue;
                 }
                 publishProgress(i+1);
             }

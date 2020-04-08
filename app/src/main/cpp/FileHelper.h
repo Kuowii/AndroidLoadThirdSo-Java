@@ -36,10 +36,10 @@ int SaveFile(const char* filePath,char* source,int len)
         return -3;
     }
 
-    fwrite(source, sizeof(char),len,pf);
+    int r = fwrite(source, sizeof(char),len,pf);
     fclose(pf);
 
-    return 0;
+    return r;
 }
 
 #endif //CPPCALLTEST_JAVA_FILEHELPER_H
