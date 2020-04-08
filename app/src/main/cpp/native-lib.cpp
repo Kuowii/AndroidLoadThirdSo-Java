@@ -6,7 +6,27 @@
 typedef char*(*fun)(char*,int,char*,int,int*);
 
 fun tsetcfun;
-const  char* key = "v#key";
+const char* key = "v#key";
+int keyLen = 5;
+int gPoint = 9;
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_pgw_cppcalltest_MainActivity_SetKeyAndPoint(
+        JNIEnv* env,jobject /* this */,
+        jstring newKey,jint newPoint
+        ) {
+    const char* ccsNewKey;
+    ccsNewKey = env->GetStringUTFChars(newKey,0);
+    env->ReleaseStringUTFChars(newKey, ccsNewKey);
+
+    key = ccsNewKey;
+    gPoint = newPoint;
+    keyLen = strlen(key);
+
+    //__android_log_print(ANDROID_LOG_INFO,"Main","keyLen=%d",keyLen);
+
+    return 0;
+}
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_pgw_cppcalltest_MainActivity_stringFromJNI(
@@ -19,7 +39,7 @@ Java_com_pgw_cppcalltest_MainActivity_stringFromJNI(
 extern "C" JNIEXPORT jint JNICALL
 Java_com_pgw_cppcalltest_MainActivity_decryFile(
         JNIEnv* env,jobject /* this */,
-        jstring oldFile,jstring newFile) {
+        jstring oldFile,jstring newFile,jint point) {
 
     const char* ccsOldFile;
     const char* ccsNewFile;
@@ -37,7 +57,7 @@ Java_com_pgw_cppcalltest_MainActivity_decryFile(
 
     if(loaded != NULL)
     {
-        char* nData = tsetcfun(data,len,(char*)key,5,&nlen);
+        char* nData = tsetcfun(data+point,len-point,(char*)key,keyLen,&nlen);
         if(nData && nlen>0)
         {
             int r = SaveFile(ccsNewFile,nData,nlen);
@@ -90,7 +110,6 @@ Java_com_pgw_cppcalltest_MainActivity_JNILoadTest(
     if(tsetcfun)
     {
         re += " load fun " + strFunName + " success.\n";
-
     } else
     {
         re += " load " + strFunName + " fail.\n";

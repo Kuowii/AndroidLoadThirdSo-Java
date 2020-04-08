@@ -5,6 +5,7 @@ import androidx.core.app.ActivityCompat;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
@@ -15,7 +16,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -27,10 +30,36 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     TextView tv;
+    TextView pbText;
     EditText textModuleName;
     EditText textFunName;
+    EditText textKey;
+    EditText textPoint;
     Button btnLoad;
     Button btnDecry;
+    ProgressBar pbMainDealFiles;
+
+    public int tPoint;
+    public int nCount;
+
+
+    SharedPreferences preferences;
+    SharedPreferences.Editor editor;
+
+    /**
+     * 单例
+     */
+    protected static MainActivity _Instance = null;
+
+    public static MainActivity GetInstance()
+    {
+        if(_Instance==null)
+        {
+            Log.e("Main", "GetInstance: null");
+        }
+
+        return _Instance;
+    }
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -43,21 +72,31 @@ public class MainActivity extends AppCompatActivity {
      */
     public native String stringFromJNI();
     public native String JNILoadTest(String moduleName,String funName);
-    public native int decryFile(String oldFile,String newFile);
+    public native int decryFile(String oldFile,String newFile,int point);
+    public native int SetKeyAndPoint(String newKey,int newPoint);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         verifyStoragePermissions(this);
+        _Instance = this;
 
         setContentView(R.layout.activity_main);
 
         // Example of a call to a native method
         tv = findViewById(R.id.sample_text);
+        pbText = findViewById(R.id.pbText);
         textModuleName = findViewById(R.id.textModuleName);
         textFunName = findViewById(R.id.textFunName);
+        textKey = findViewById(R.id.textKey);
+        textPoint = findViewById(R.id.textPoint);
         btnLoad = findViewById(R.id.btnLoad);
         btnDecry = findViewById(R.id.btnDecry);
+        pbMainDealFiles = findViewById(R.id.pbMainDealFiles);
+
+        preferences = getSharedPreferences("TestCache", MODE_PRIVATE);
+        editor = preferences.edit();
+        InitData();
 
         //tv.setText(JNILoadTest("libthird-lib.so","TestC"));
 
@@ -76,6 +115,8 @@ public class MainActivity extends AppCompatActivity {
                 CopyFile(moduleName.toString());
 
                 tv.setText(JNILoadTest("/data/user/0/" + pn +"/app_libs" + moduleName.toString(),funName.toString() ));
+
+
             }
         });
 
@@ -83,9 +124,46 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public  void onClick(View v)
             {
+                Editable key = textKey.getText();
+                Editable point = textPoint.getText();
+                if(TextUtils.isEmpty(key) || TextUtils.isEmpty(point))
+                {
+                    tv.setText( "Invail config." );
+                    return;
+                }
+
+                tPoint = Integer.parseInt(point.toString());
+                SetKeyAndPoint(key.toString(),tPoint);
+
                 CheckFiles();
             }
         });
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        SaveData();
+        super.onDestroy();
+    }
+
+    protected  void InitData()
+    {
+        textModuleName.setText(preferences.getString("ModuleName","/libthird-lib.so"));
+        textFunName.setText(preferences.getString("FunName","TestDecryptData"));
+        textKey.setText(preferences.getString("Key","v#key"));
+        textPoint.setText(preferences.getString("Point","9"));
+    }
+
+    protected void SaveData()
+    {
+        editor.putString("ModuleName",textModuleName.getText().toString());
+        editor.putString("FunName",textFunName.getText().toString());
+        editor.putString("Key",textKey.getText().toString());
+        editor.putString("Point",textPoint.getText().toString());
+        if(editor.commit()){
+            Toast.makeText(this,"保存成功！", Toast.LENGTH_SHORT).show();
+        }
     }
 
     // 将 so 文件复制到对应的可读取目录
@@ -156,23 +234,25 @@ public class MainActivity extends AppCompatActivity {
     protected void CheckFiles()
     {
         List<String> Files = FileHelper.getFilesAllName(Environment.getExternalStorageDirectory() + "/Pictures/Data/Origin");
-        List<String> Files_New = new ArrayList<>();
-        int size = Files.size();
-        for(int i =0;i<size;i++)
-        {
-            String old = Files.get(i);
-            String parentPath = old.substring(old.lastIndexOf("Origin") + 6);
-            String newFile = Environment.getExternalStorageDirectory() + "/Pictures/Data/New"+parentPath;
-            FileHelper.createFile(newFile);
+        nCount = Files.size();
+        pbMainDealFiles.setMax(nCount);
+        pbMainDealFiles.setProgress(0);
+        DealFilesAsyncTask task = new DealFilesAsyncTask();
+        task.execute(Files);
+    }
 
-            int r = decryFile(old,newFile);
+    /**
+     * 输出日志
+     */
+    public void Log(String info)
+    {
+        tv.setText(info);
+    }
 
-            if(r > 0)
-            {
-                tv.setText(old +" decry fail.");
-                break;
-            }
-        }
+    public void  Update(Integer cur)
+    {
+        pbText.setText(String.format("%d/%d",cur,nCount));
+        pbMainDealFiles.setProgress(cur);
     }
 
 

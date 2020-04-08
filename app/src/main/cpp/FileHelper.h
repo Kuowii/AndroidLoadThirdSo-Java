@@ -23,7 +23,6 @@ char* LoadFile(const char* filePath,char** load,long* len)
     *len = lSize;
     *load = text;
 
-    __android_log_print(ANDROID_LOG_INFO,"Main","lSize=%d",lSize);
     fclose(pf);
 
     return text;
