@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
                 String pn = getPackageName();
                 String moduleFileName = CopyFile(moduleName.toString());
 
-                tv.setText(JNILoadTest("/data/user/0/" + pn +"/app_libs" + moduleFileName,funName.toString() ));
+                tv.setText(JNILoadTest("/data/user/0/" + pn +"/app_libs/" + moduleFileName,funName.toString() ));
 
                 SaveData();
             }
