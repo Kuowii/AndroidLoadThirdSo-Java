@@ -112,9 +112,9 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 String pn = getPackageName();
-                CopyFile(moduleName.toString());
+                String moduleFileName = CopyFile(moduleName.toString());
 
-                tv.setText(JNILoadTest("/data/user/0/" + pn +"/app_libs" + moduleName.toString(),funName.toString() ));
+                tv.setText(JNILoadTest("/data/user/0/" + pn +"/app_libs" + moduleFileName,funName.toString() ));
 
                 SaveData();
             }
@@ -167,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 将 so 文件复制到对应的可读取目录
-    protected int CopyFile(String path)
+    protected String CopyFile(String path)
     {
         try {
             String localPath = Environment.getExternalStorageDirectory() + path;
@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
             if (null == tokens || tokens.length <= 0
                     || tokens[tokens.length - 1] == "") {
                 Log.v("Main", "非法的文件路径！");
-                return -3;
+                return "NULL";
             }
             // 开辟一个输入流
             File inFile = new File(localPath);
@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
             if (!inFile.exists()) {
                 // 下载远程驱动文件
                 Log.v("Main", inFile.getAbsolutePath() + " is not fond!");
-                return 1;
+                return "NULL";
             }
             FileInputStream fis = new FileInputStream(inFile);
 
@@ -221,12 +221,12 @@ public class MainActivity extends AppCompatActivity {
             //System.load(soFile.getAbsolutePath());
             //Log.v("Main", "### System.load End");
 
-            return 0;
+            return tokens[tokens.length-1];
 
         } catch (Exception e) {
             Log.v("Main", "Exception   " + e.getMessage());
             e.printStackTrace();
-            return -1;
+            return e.getMessage();
         }
     }
 
