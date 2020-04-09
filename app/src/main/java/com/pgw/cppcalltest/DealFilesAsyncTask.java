@@ -5,12 +5,12 @@ import android.os.Environment;
 
 import java.util.List;
 
-public class DealFilesAsyncTask extends AsyncTask< List<String>, Integer,Integer> {
+public class DealFilesAsyncTask extends AsyncTask< String, Integer,Integer> {
 
     MainActivity ins = null;
     // 作用：接收输入参数、执行任务中的耗时操作、返回 线程任务执行的结果
     @Override
-    protected Integer doInBackground(List<String> ...params) {
+    protected Integer doInBackground(String ...params) {
 
         int size = 0;
         try {
@@ -19,12 +19,12 @@ public class DealFilesAsyncTask extends AsyncTask< List<String>, Integer,Integer
                 ins = MainActivity.GetInstance();
             }
 
-            // 此处似乎不允许跨类调用UI变化
-            //ins.Log("Wait for count files.");
-            //List<String> Files = FileHelper.getFilesAllName(params[0]);
-            List<String> Files = params[0];
+            // 不允许在 doInBackground 中更新UI , 所以UI更新使用 publishProgress 进行发送处理
+            publishProgress(1,0);
+            List<String> Files = FileHelper.getFilesAllName(params[0]);
+            //List<String> Files = params[0];
             size = Files.size();
-            //ins.UpdateMax(size);
+            publishProgress(2,size);
 
             String newRootPath = Environment.getExternalStorageDirectory() + "/Pictures/Data/New";
             for(int i =0;i<size;i++)
@@ -37,10 +37,10 @@ public class DealFilesAsyncTask extends AsyncTask< List<String>, Integer,Integer
                 int r = ins.decryFile(old,newFile,ins.tPoint);
                 if(r > 0)
                 {
-                    //ins.Log(r+ " return. Decry fail : " + old);
-                    continue;
+                    publishProgress(100,i);
+                    //continue;
                 }
-                publishProgress(i+1);
+                publishProgress(3,i+1);
             }
 
         }
@@ -59,7 +59,24 @@ public class DealFilesAsyncTask extends AsyncTask< List<String>, Integer,Integer
             ins = MainActivity.GetInstance();
         }
 
-        ins.Update(values[0]);
+        switch (values[0])
+        {
+            case 1:
+                ins.Log("Waiting for counting files.");
+                break;
+            case 2:
+                ins.UpdateMax(values[1]);
+                ins.Log(String.format("get %d files.",values[1]));
+                break;
+            case 3:
+                ins.Update(values[1]);
+                break;
+            case 100:
+                ins.Log(String.format("decry %d fail.",values[1]));
+                break;
+        }
+
+
     }
 
     // 任务执行完毕调用该方法，在UI线程中执行，更新数据到UI界面

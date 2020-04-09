@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
 
                 tv.setText(JNILoadTest("/data/user/0/" + pn +"/app_libs" + moduleName.toString(),funName.toString() ));
 
-
+                SaveData();
             }
         });
 
@@ -233,12 +233,12 @@ public class MainActivity extends AppCompatActivity {
     // 获取指定目录下的所有文件
     protected void CheckFiles()
     {
-        List<String> Files = FileHelper.getFilesAllName(Environment.getExternalStorageDirectory() + "/Pictures/Data/Origin");
-        nCount = Files.size();
-        pbMainDealFiles.setMax(nCount);
+        //List<String> Files = FileHelper.getFilesAllName(Environment.getExternalStorageDirectory() + "/Pictures/Data/Origin");
+        //nCount = Files.size();
+        //pbMainDealFiles.setMax(nCount);
         pbMainDealFiles.setProgress(0);
         DealFilesAsyncTask task = new DealFilesAsyncTask();
-        task.execute(Files);
+        task.execute(Environment.getExternalStorageDirectory() + "/Pictures/Data/Origin");
     }
 
     /**
